@@ -1,6 +1,7 @@
 package com.wm.file.util;
 
 import com.wm.file.service.IAsynExportExcelService;
+import com.wm.file.service.impl.MyThreadA;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +12,7 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
 
 import static com.wm.file.service.impl.IAsynExportExcelServiceImpl.DATA_TOTAL_COUNT;
 
@@ -28,7 +28,7 @@ import static com.wm.file.service.impl.IAsynExportExcelServiceImpl.DATA_TOTAL_CO
 public class AsynExcelExportUtil {
 
     // 定义导出的excel文件保存的路径
-    private String filePath = "C:\\Users\\Deamer\\Desktop\\export\\";
+    private String filePath = "E:\\test\\export\\";
     @Resource
     private IAsynExportExcelService asynExportExcelService;
     /**
@@ -43,6 +43,16 @@ public class AsynExcelExportUtil {
         queue = new ConcurrentLinkedQueue<>();
     }
 
+
+    @Resource
+    private MyExcelExportUtil myExcelExportUtil;
+
+    private final static ArrayBlockingQueue<Runnable> WORK_QUEUE = new ArrayBlockingQueue<>(1024);
+    private final static RejectedExecutionHandler HANDLER = new ThreadPoolExecutor.CallerRunsPolicy();
+
+    private static  ThreadPoolExecutor executor = new ThreadPoolExecutor(8, 16, 1000, TimeUnit.MILLISECONDS, WORK_QUEUE, HANDLER);
+
+
     /**
      * 多线程批量导出 excel
      *
@@ -55,8 +65,10 @@ public class AsynExcelExportUtil {
         //异步转同步，等待所有线程都执行完毕返回 主线程才会结束
         try {
             CountDownLatch cdl = new CountDownLatch(queue.size());
+
             while (queue.size() > 0) {
-                asynExportExcelService.excuteAsyncTask(queue.poll(), cdl);
+                executor.execute(new MyThreadA(queue.poll(), cdl,myExcelExportUtil));
+                //asynExportExcelService.excuteAsyncTask(queue.poll(), cdl);
             }
             cdl.await();
             System.out.println("excel导出完成·······················");

@@ -41,7 +41,10 @@ public class MyExcelExportUtil {
      * 小量数据允许导出的最大条数
      */
     private static final Integer EXPORT_EXCEL_BASE_MAX_NUM = 100000;
-    public static int USE_SXSSF_LIMIT = 100000;
+    public static int USE_SXSSF_LIMIT = 10000;//万级以上，HSSFWorkbook 和XSSFWorkbook 容易报内存不足
+    //HSSFWorkbook 用于Excel2003版及更早版本(扩展名为.xls)的导出。
+    //
+    //XSSFWorkbook 用于Excel2007版(扩展名为.xlsx)的导出。
 
     /**
      * 获取导出的 Workbook对象

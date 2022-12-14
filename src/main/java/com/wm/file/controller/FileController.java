@@ -1,4 +1,4 @@
-package com.wm.file;
+package com.wm.file.controller;
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
@@ -38,7 +38,7 @@ public class FileController {
     @GetMapping(value = "/asynExport")
     public void asynExportData(HttpServletResponse response) throws InterruptedException {
         asynExcelExportUtil.threadExcel(response);
-        //1000000-39511ms 100000-7750ms 10000-789ms
+        //1000000-39511ms 400000-27750ms 10000-789ms
     }
 
     /**
@@ -60,7 +60,7 @@ public class FileController {
         try {
             long start = System.currentTimeMillis();
             Workbook workbook = myExcelExportUtil.getWorkbook("计算机一班学生", "学生", MsgClient.class, list, ExcelType.XSSF);
-            String filePath = "C:\\Users\\Administrator\\Desktop\\export\\exportAll.xlsx";
+            String filePath = "E:\\test\\export\\exportAll.xlsx";
             File file = new File(filePath);
             MyExcelExportUtil.exportExcel2(workbook, file);
             long end = System.currentTimeMillis();

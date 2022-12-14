@@ -2,10 +2,8 @@ package com.wm.file.service.impl;
 
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelType;
 import com.wm.file.entity.MsgClient;
-import com.wm.file.service.IAsynExportExcelService;
 import com.wm.file.util.MyExcelExportUtil;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -14,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @ClassName: IAsynExportExcelServiceImpl
@@ -22,16 +20,19 @@ import java.util.concurrent.*;
  * @Author: WM
  * @Date: 2021-08-06 20:06
  **/
-@Service
-public class IAsynExportExcelServiceImpl implements IAsynExportExcelService {
+public class MyThreadA implements Runnable {
 
-    // 假定数据量是40万，因为我系统的最大线程数是8，数据量设置太大容易内存溢出
-    public static final long DATA_TOTAL_COUNT = 1000000;
-    // 查询要导出的批次数据
-    static List<Object> list = new ArrayList<>();
+    private Map<String, Object> map;
+    private CountDownLatch cdl;
+    private List<Object> list = new ArrayList<>();
 
-    static {
-        for (int i = 0; i < DATA_TOTAL_COUNT; i++) {  //模拟库中一百万数据量
+    private MyExcelExportUtil myExcelExportUtil;
+
+    public MyThreadA(Map<String, Object> map, CountDownLatch cdl,MyExcelExportUtil myExcelExportUtil) {
+        this.map = map;
+        this.cdl = cdl;
+        this.myExcelExportUtil =myExcelExportUtil;
+        for (int i = 0; i < 1000000; i++) {  //模拟库中100万数据量
             MsgClient client = new MsgClient();
             client.setBirthday(new Date());
             client.setClientName("小明xxxsxsxsxsxsxsxsxsxsx" + i);
@@ -43,13 +44,7 @@ public class IAsynExportExcelServiceImpl implements IAsynExportExcelService {
         }
     }
 
-    @Resource
-    private MyExcelExportUtil myExcelExportUtil;
-
-
-    @Override
-    @Async("taskExecutor")
-    public void excuteAsyncTask(Map<String, Object> map, CountDownLatch cdl) {
+    public void run() {
         long start = System.currentTimeMillis();
         int currentPage = (int) map.get("page");
         int pageSize = (int) map.get("limit");
@@ -94,4 +89,6 @@ public class IAsynExportExcelServiceImpl implements IAsynExportExcelService {
         }
         return subList;
     }
+
+
 }
