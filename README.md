@@ -21,7 +21,16 @@
 HSSFWorkbook 用于Excel2003版及更早版本(扩展名为.xls)的导出。
 XSSFWorkbook 用于Excel2007版(扩展名为.xlsx)的导出。
 
-故
+故采用 SXSSFWorkbook
+
+>SXSSFWorkbook是用来生成海量excel数据文件，主要原理是借助临时存储空间生成excel，
+>SXSSFWorkbook专门处理大数据，对于大型excel的创建且不会内存溢出的，就只有SXSSFWorkbook了。
+>它的原理很简单，用硬盘空间换内存（就像hashmap用空间换时间一样）。 SXSSFWorkbook是streaming
+>版本的XSSFWorkbook,它只会保存最新的excel rows在内存里供查看，在此之前的excel rows都会被写入到
+>硬盘里（Windows电脑的话，是写入到C盘根目录下的temp文件夹）。被写入到硬盘里的rows是不可见的/不
+>可访问的。只有还保存在内存里的才可以被访问到。 
+
+
 ```java
 public class AsynExcelExportUtil {
     
